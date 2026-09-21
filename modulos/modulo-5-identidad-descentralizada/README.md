@@ -7,7 +7,7 @@
 | [`teoria/`](teoria/) | Guion teórico y notas de aula. |
 | [`diapositivas/`](diapositivas/) | Diapositivas del módulo (se generan más adelante). |
 | [`recursos/`](recursos/) | Enlaces y bibliografía (ARF, OpenID4VP, SD-JWT VC, ISO mdoc). |
-| [`laboratorio-6-sdjwt-presentacion-selectiva/`](laboratorio-6-sdjwt-presentacion-selectiva/) | Lab 6: SD-JWT y presentación selectiva. |
+| [`laboratorio-5-sdjwt-presentacion-selectiva/`](laboratorio-5-sdjwt-presentacion-selectiva/) | Lab 5: SD-JWT y presentación selectiva. |
 
 ## Contenidos (para público de cero)
 

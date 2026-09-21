@@ -61,7 +61,7 @@ Como mucho, una diapositiva de "esto existe y es el siguiente paso" al cierre de
 - **3.6 y 3.7** (alg:none, confusión de algoritmo, DPoP, mTLS): 15 minutos de "por qué el token
   robado sigue funcionando y qué se hace al respecto". Sin lab.
 - **Lab 2**: fuera el backend WebAuthn a mano. Keycloak lo trae nativo.
-- **Lab 6**: fuera el SDK. Emitir con herramienta ya hecha y abrir el token.
+- **Lab 5**: fuera el SDK. Emitir con herramienta ya hecha y abrir el token.
 - **Módulo 4**: de 3h a 2h (es el más abstracto para gente sin contexto organizativo). La hora
   liberada va al módulo 3, que es donde se ahogan.
 
@@ -161,7 +161,7 @@ Reparto de los 60 minutos: 10 de arranque, 25 guiados, 10 de romperlo, 10 de ent
 
 **Montaje:** compose con Keycloak (tag fijo) y `start-dev --import-realm`, con `./realms` montado
 en `/opt/keycloak/data/import`. Realm exportado vacío pero **con el cliente ya creado**, para que el
-lab 3 no dependa de que acertaran aquí.
+lab 3.1 no dependa de que acertaran aquí.
 
 **El alumno:** levanta el stack, entra a la consola admin, crea el realm `curso`, dos usuarios, los
 roles `lector` y `editor`, el grupo `redaccion` con `editor` asignado, mete un usuario en el grupo y
@@ -195,7 +195,7 @@ exista. Da pie a hablar de recuperación de cuenta, que es el problema de verdad
 
 **Entregable:** captura del panel con la credencial, más una frase explicando por qué no es phishable.
 
-### Lab 3 — SPA con PKCE
+### Lab 3.1 — SPA con PKCE
 
 **Montaje:** `index.html` estático con keycloak-js servido por nginx en el compose. Nada de Node.
 `pkceMethod: 'S256'`, arranque con `check-sso`. Registrar `http://localhost:8081/*` como redirect URI
@@ -215,7 +215,7 @@ servidor lo rechaza: el código robado no vale sin la prueba de que eres quien l
 **Entregable:** las dos peticiones capturadas y el access token decodificado con `iss`, `aud` y `exp`
 señalados.
 
-### Lab 4 — Gateway, autenticación en el borde y cabeceras inyectadas
+### Lab 3.2 — Gateway, autenticación en el borde y cabeceras inyectadas
 
 **Decisión:** se descarta APISIX (modelo mental de rutas, upstreams, plugins y admin API demasiado
 costoso de aprender). **Se usa oauth2-proxy**: un binario con un solo propósito y configuración plana.
@@ -265,7 +265,7 @@ el argumento a favor de validar localmente.
 > `KC_HOSTNAME=keycloak` y añadir `keycloak` al `/etc/hosts` de los alumnos, o usar la misma URL en
 > ambos lados. Probarlo en frío una vez, borrando volúmenes, antes de la clase.
 
-### Lab 5 — Acceso efímero con Vault
+### Lab 4 — Acceso efímero con Vault
 
 Sustituye al lab de PIM del programa original: PIM es Entra ID (nube, tenant, licencia P2), no hay
 contenedor.
@@ -286,7 +286,7 @@ Introduce revocación frente a expiración, mismo debate que el JWT del módulo 
 **Entregable:** las dos credenciales distintas, la conexión correcta y el fallo tras el TTL, con la
 hora visible.
 
-### Lab 6 — SD-JWT y presentación selectiva
+### Lab 5 — SD-JWT y presentación selectiva
 
 **Montaje:** stack emisor y verificador con interfaz web empaquetado en el compose, más un
 decodificador de SD-JWT. Verificar versiones la semana anterior, el ecosistema se mueve rápido.
@@ -313,7 +313,7 @@ cuáles no.
 1. **Un repo, un compose, un realm exportado.** Todo el curso sobre la misma instancia de Keycloak.
 2. **Fijar tags de imagen.** Nada de `:latest`: la consola de Keycloak cambia entre versiones y las
    capturas y el guion dejan de coincidir.
-3. **Resolver el issuer antes de la clase** (ver aviso del lab 4).
+3. **Resolver el issuer antes de la clase** (ver aviso del lab 3.2).
 4. **Plan sin red.** Veinte personas haciendo pull de Keycloak a la vez en el wifi del centro no
    termina bien. Imágenes precargadas o registry local.
 5. **Guion clic a clic con salida esperada** en cada paso, y comando de reset. El que se descuelga en

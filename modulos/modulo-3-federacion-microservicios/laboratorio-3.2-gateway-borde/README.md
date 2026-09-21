@@ -1,4 +1,4 @@
-# Lab 4 — Gateway, autenticación en el borde y cabeceras inyectadas
+# Lab 3.2 — Gateway, autenticación en el borde y cabeceras inyectadas
 
 **Módulo:** [3 — Federación y microservicios](../README.md).
 **Infra:** Keycloak compartido + oauth2-proxy + `traefik/whoami`.
@@ -34,4 +34,4 @@ Las tres respuestas (sin sesión, válida, token manipulado) y la cabecera inyec
 - [ ] Guion clic-a-clic con salida esperada y comando de reset
 - [ ] Config oauth2-proxy + whoami en [`config/`](config/)
 
-Fuente: [briefing §3, Lab 4](../../../docs/curso-identidad-briefing.md).
+Fuente: [briefing §3, Lab 3.2](../../../docs/curso-identidad-briefing.md).

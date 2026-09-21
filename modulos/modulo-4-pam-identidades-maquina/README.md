@@ -10,7 +10,7 @@ módulo 3.
 | [`teoria/`](teoria/) | Guion teórico y notas de aula. |
 | [`diapositivas/`](diapositivas/) | Diapositivas del módulo (se generan más adelante). |
 | [`recursos/`](recursos/) | Enlaces y bibliografía (IGA, PAM, JIT/JEA, NHI). |
-| [`laboratorio-5-vault-efimero/`](laboratorio-5-vault-efimero/) | Lab 5: acceso efímero con Vault. |
+| [`laboratorio-4-vault-efimero/`](laboratorio-4-vault-efimero/) | Lab 4: acceso efímero con Vault. |
 
 ## Contenidos
 

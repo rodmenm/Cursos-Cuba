@@ -1,4 +1,4 @@
-# Lab 6 — SD-JWT y presentación selectiva
+# Lab 5 — SD-JWT y presentación selectiva
 
 **Módulo:** [5 — Identidad descentralizada](../README.md).
 **Infra:** stack emisor + verificador con interfaz web + decodificador SD-JWT en el compose.
@@ -31,4 +31,4 @@ Los dos tokens, la política del verificador y una frase sobre qué datos ha vis
 - [ ] Guion clic-a-clic con salida esperada y comando de reset
 - [ ] Stack emisor/verificador en [`config/`](config/)
 
-Fuente: [briefing §3, Lab 6](../../../docs/curso-identidad-briefing.md).
+Fuente: [briefing §3, Lab 5](../../../docs/curso-identidad-briefing.md).

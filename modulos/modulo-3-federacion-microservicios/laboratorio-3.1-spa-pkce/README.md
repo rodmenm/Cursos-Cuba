@@ -1,4 +1,4 @@
-# Lab 3 — SPA con PKCE
+# Lab 3.1 — SPA con PKCE
 
 **Módulo:** [3 — Federación y microservicios](../README.md).
 **Infra:** Keycloak compartido + SPA estática servida por nginx.
@@ -31,4 +31,4 @@ Las dos peticiones capturadas y el access token decodificado con `iss`, `aud` y 
 - [ ] Guion clic-a-clic con salida esperada y comando de reset
 - [ ] `index.html` + config nginx en [`config/`](config/)
 
-Fuente: [briefing §3, Lab 3](../../../docs/curso-identidad-briefing.md).
+Fuente: [briefing §3, Lab 3.1](../../../docs/curso-identidad-briefing.md).

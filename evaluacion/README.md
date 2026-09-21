@@ -17,10 +17,10 @@ configurar de entender.
 |---|---|
 | 1 | Export del realm en JSON con roles y grupos. |
 | 2 | Captura del panel del autenticador virtual + frase sobre por qué no es phishable. |
-| 3 | Las dos peticiones (`/auth`, `/token`) + access token decodificado (`iss`, `aud`, `exp`). |
-| 4 | Las tres respuestas (sin sesión, válida, token manipulado) + cabecera inyectada. |
-| 5 | Dos credenciales distintas, conexión correcta y fallo tras el TTL, con hora visible. |
-| 6 | Los dos tokens, la política del verificador y una frase sobre qué datos vio y cuáles no. |
+| 3.1 | Las dos peticiones (`/auth`, `/token`) + access token decodificado (`iss`, `aud`, `exp`). |
+| 3.2 | Las tres respuestas (sin sesión, válida, token manipulado) + cabecera inyectada. |
+| 4 | Dos credenciales distintas, conexión correcta y fallo tras el TTL, con hora visible. |
+| 5 | Los dos tokens, la política del verificador y una frase sobre qué datos vio y cuáles no. |
 
 ## Pendiente
 - [ ] Rúbrica detallada por entregable

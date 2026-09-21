@@ -1,4 +1,4 @@
-# Lab 5 — Acceso efímero con Vault
+# Lab 4 — Acceso efímero con Vault
 
 **Módulo:** [4 — PAM e identidades de máquina](../README.md).
 **Infra:** Vault (modo dev) + Postgres en el compose.
@@ -31,4 +31,4 @@ Las dos credenciales distintas, la conexión correcta y el fallo tras el TTL, co
 - [ ] Guion clic-a-clic con salida esperada y comando de reset
 - [ ] Scripts de init de Vault en [`config/`](config/)
 
-Fuente: [briefing §3, Lab 5](../../../docs/curso-identidad-briefing.md).
+Fuente: [briefing §3, Lab 4](../../../docs/curso-identidad-briefing.md).

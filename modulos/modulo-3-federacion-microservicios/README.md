@@ -9,8 +9,8 @@ Es el módulo donde se ahogan; recibe la hora liberada del módulo 4. Tiene **do
 | [`teoria/`](teoria/) | Guion teórico y notas de aula. |
 | [`diapositivas/`](diapositivas/) | Diapositivas del módulo (se generan más adelante). |
 | [`recursos/`](recursos/) | RFCs y bibliografía (OAuth 2.1, OIDC, RFC 9700, 7662, 9449, 8705). |
-| [`laboratorio-3-spa-pkce/`](laboratorio-3-spa-pkce/) | Lab 3: SPA con PKCE. |
-| [`laboratorio-4-gateway-borde/`](laboratorio-4-gateway-borde/) | Lab 4: gateway y autenticación en el borde. |
+| [`laboratorio-3.1-spa-pkce/`](laboratorio-3.1-spa-pkce/) | Lab 3.1: SPA con PKCE. |
+| [`laboratorio-3.2-gateway-borde/`](laboratorio-3.2-gateway-borde/) | Lab 3.2: gateway y autenticación en el borde. |
 
 ## Contenidos
 

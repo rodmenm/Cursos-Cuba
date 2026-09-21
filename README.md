@@ -33,9 +33,9 @@ el realm compartido de Keycloak (el briefing exige un solo compose).
 |---|---|
 | [1. Zero Trust y ciclo de vida](modulos/modulo-1-zero-trust-ciclo-vida/) | Lab 1 — Keycloak, realms y RBAC |
 | [2. Autenticación robusta](modulos/modulo-2-autenticacion-robusta/) | Lab 2 — WebAuthn sin backend |
-| [3. Federación y microservicios](modulos/modulo-3-federacion-microservicios/) | Lab 3 — SPA con PKCE · Lab 4 — Gateway en el borde |
-| [4. PAM e identidades de máquina](modulos/modulo-4-pam-identidades-maquina/) | Lab 5 — Acceso efímero con Vault |
-| [5. Identidad descentralizada](modulos/modulo-5-identidad-descentralizada/) | Lab 6 — SD-JWT y presentación selectiva |
+| [3. Federación y microservicios](modulos/modulo-3-federacion-microservicios/) | Lab 3.1 — SPA con PKCE · Lab 3.2 — Gateway en el borde |
+| [4. PAM e identidades de máquina](modulos/modulo-4-pam-identidades-maquina/) | Lab 4 — Acceso efímero con Vault |
+| [5. Identidad descentralizada](modulos/modulo-5-identidad-descentralizada/) | Lab 5 — SD-JWT y presentación selectiva |
 
 ## Otras carpetas
 
