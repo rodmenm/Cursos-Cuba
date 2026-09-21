@@ -123,6 +123,23 @@ hace falta activar la required action **Delete Account** (**Authentication** →
 Actions**) además del rol: rol y required action son dos mecanismos independientes, y este mismo
 patrón reaparece en el Lab 2 con WebAuthn. Si nadie llega, ciérralo tú en el resumen final del lab.
 
+## Preguntas para el aula
+
+Pensadas para plantear en el momento exacto del guion que se indica — el instructor para y
+pregunta antes de seguir, no se responden solas.
+
+| Paso | Pregunta | Respuesta |
+|---|---|---|
+| Arranque, paso 3 | ¿Por qué dice "you are logged in as a temporary admin user"? | Las credenciales de bootstrap (`KC_BOOTSTRAP_ADMIN_*`) suelen vivir en texto plano (nuestro propio `.env`). Keycloak las marca como temporales para forzar a no dejarlas como permanentes — es Zero Trust (Mód. 1) aplicado a sus propias credenciales, y el mismo problema que ataca NHI en el Mód. 4. |
+| Guiado, paso 7 | ¿Qué significan `Argon2id`, `memory: 7168`, `hashIterations: 5`, `parallelism: 1` en Credentials? | Argon2 es memory-hard: se defiende con memoria, no con CPU puro como PBKDF2, así que necesita menos iteraciones para ser igual o más seguro (una GPU/ASIC no puede paralelizar barato un algoritmo que exige memoria). Esos valores coinciden con un preset recomendado por el OWASP Password Storage Cheat Sheet. |
+| Guiado, paso 7 | ¿Por qué no se ve la contraseña ni el hash en crudo de cada usuario? | Keycloak nunca almacena ni expone el secreto en claro ni el hash completo — ni el admin puede "verlo", solo resetearlo. Nadie con acceso a la base de datos o a la consola debería poder recuperar la contraseña de un usuario. |
+| Guiado, pasos 2/4/5 | ¿Cuál es la diferencia entre un rol de realm y un rol de cliente? | Rol de realm = concepto de negocio que tú defines (`lector`, `editor`), no depende de ninguna app. Rol de cliente = permiso definido por una aplicación concreta (`manage-account`, `view-profile`, del cliente `account`). Uno no sustituye al otro; por eso al buscar `manage-account` hay que filtrar por roles de cliente, no de realm. |
+| Guiado, paso 5 | ¿Por qué `editor` se asocia con el rol de realm `lector` en vez de añadir otra vez `view-profile` directamente? | Así queda declarado "editor ⊇ lector" de forma explícita y visible en Associated roles. Si mañana cambia qué significa `lector`, `editor` lo hereda automáticamente. Si se hubiera duplicado `view-profile` a mano en los dos, coincidirían por casualidad, no por relación — un cambio futuro en uno no se propagaría al otro. |
+| Guiado, paso 12 | ¿Por qué a Marta se le rompe toda la Account Console en vez de verse en modo lectura? | Limitación real de la Account Console v3 de Keycloak: no degrada a un modo de solo lectura, exige `manage-account` para cargar siquiera. No es un fallo de configuración nuestro — verificado al montar el lab. |
+| Romperlo, paso 2 | Diego pierde la capacidad de editar solo con refrescar la página, sin volver a loguear — ¿por qué? | Cada carga de página pide un token nuevo a partir de la sesión activa; los roles se recalculan en cada emisión, no hay un token "cacheado para siempre" desde el login original. Primer aviso de algo que reaparece en el Módulo 3: los JWT no se actualizan solos, hace falta emitir uno nuevo. |
+| Romperlo, paso 4 | ¿Qué pasaría si `redaccion` tuviera 200 personas en vez de una? | Es la ventaja de RBAC por grupo: revocar a 200 personas es un clic (quitar el rol del grupo) en vez de 200 acciones individuales usuario a usuario. |
+| Guiado, paso 11 / Reto opcional | ¿Qué diferencia real hay entre que un grupo lleve dos roles o que un usuario esté en dos grupos con un rol cada uno? ¿Y si dos roles/grupos dijeran cosas contradictorias? | El resultado es idéntico en ambos casos: los roles en Keycloak son puramente aditivos (la unión de permisos), no hay roles que "resten" o "denieguen". Por eso no puede haber contradicción real en RBAC puro — esa noción de conflicto/prioridad solo aparece en ABAC/PBAC (Módulo 1), donde sí hay reglas con precedencia. |
+
 ## Colchón (5 min)
 
 Para el atasco típico: alguien se queda mirando `master` y no ve usuarios/roles que creó en
@@ -143,15 +160,5 @@ Sin el `-v` el volumen `keycloak_data` persiste, que es justo lo que queremos **
 ## Pendiente
 - [ ] Decidir si el dominio "editorial" (Marta/Diego, `lectura`/`redaccion`) se mantiene o se cambia
       a otro (ej. hospital, empresa) antes de dar el lab por cerrado.
-- [ ] Decidir si se explican en clase, y dónde (¿aquí, en teoría del Módulo 1, o en el Módulo 4?),
-      dos cosas que aparecen solas al hacer el lab y que no son ruido:
-      - El aviso de **"temporary admin user"** al entrar por primera vez (Keycloak 26 marca como
-        temporal el admin creado por bootstrap `KC_BOOTSTRAP_ADMIN_*`, precisamente porque esas
-        credenciales suelen vivir en texto plano como en nuestro propio `.env` — engancha con
-        Zero Trust del Módulo 1 y con NHI/secretos del Módulo 4).
-      - Los parámetros del hash de contraseña en la pestaña Credentials (Argon2id, `memory: 7168`,
-        `hashIterations: 5`, `parallelism: 1` — coincide con un preset recomendado por el OWASP
-        Password Storage Cheat Sheet; buen gancho para explicar por qué menos iteraciones con
-        Argon2 no significa menos seguridad que PBKDF2).
 
 Fuente: [briefing §3, Lab 1](../../../docs/curso-identidad-briefing.md).
