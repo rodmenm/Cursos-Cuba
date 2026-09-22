@@ -1,0 +1,58 @@
+name: lab1-keycloak
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.4
+    container_name: keycloak
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME: keycloak
+    command:
+      - start-dev
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  whoami:
+    image: traefik/whoami:v1.10
+    container_name: whoami-lab3-2
+    restart: unless-stopped
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.4
+    container_name: oauth2-proxy-lab3-2
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    ports:
+      - "8082:4180"
+    command:
+      - --provider=keycloak-oidc
+      - --oidc-issuer-url=http://keycloak:8080/realms/curso
+      - --redirect-url=http://localhost:8082/oauth2/callback
+      - --http-address=0.0.0.0:4180
+      - --upstream=http://whoami:80
+      - --email-domain=*
+      - --pass-user-headers=true
+      - --pass-authorization-header=true
+      - --skip-provider-button=true
+      - --cookie-secure=false
+
+volumes:
+  keycloak_data:

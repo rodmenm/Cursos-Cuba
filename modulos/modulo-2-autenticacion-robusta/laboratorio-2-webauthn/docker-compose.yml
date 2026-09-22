@@ -1,0 +1,29 @@
+name: lab1-keycloak
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.4
+    container_name: keycloak
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      KC_HEALTH_ENABLED: "true"
+    command:
+      - start-dev
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+volumes:
+  keycloak_data:

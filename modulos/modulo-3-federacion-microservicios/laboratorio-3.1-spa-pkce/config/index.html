@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lab 3.1 — SPA con PKCE</title>
+</head>
+<body>
+  <h1>Lab 3.1 — SPA con PKCE</h1>
+  <button id="login">Iniciar sesión</button>
+  <button id="logout" style="display:none">Cerrar sesión</button>
+  <pre id="output">No autenticado.</pre>
+
+  <script type="module">
+    import Keycloak from "https://esm.sh/keycloak-js@26.7.4";
+
+    const keycloak = new Keycloak({
+      url: "http://localhost:8080",
+      realm: "curso",
+      clientId: "spa-curso"
+    });
+
+    const output = document.getElementById("output");
+    const loginBtn = document.getElementById("login");
+    const logoutBtn = document.getElementById("logout");
+
+    function render() {
+      if (keycloak.authenticated) {
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline";
+        output.textContent = JSON.stringify({
+          access_token: keycloak.token,
+          claims: keycloak.tokenParsed
+        }, null, 2);
+      } else {
+        loginBtn.style.display = "inline";
+        logoutBtn.style.display = "none";
+        output.textContent = "No autenticado.";
+      }
+    }
+
+    loginBtn.addEventListener("click", () => keycloak.login());
+    logoutBtn.addEventListener("click", () => keycloak.logout({ redirectUri: window.location.origin + "/" }));
+
+    keycloak.init({ onLoad: "check-sso", pkceMethod: "S256" })
+      .then(render)
+      .catch((e) => { output.textContent = "Error al iniciar Keycloak: " + e; });
+  </script>
+</body>
+</html>
