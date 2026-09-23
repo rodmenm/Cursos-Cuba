@@ -25,10 +25,16 @@ navegador:
 
 ```html
 <script type="module">
-  import Keycloak from "https://esm.sh/keycloak-js@26.7.4";
+  import Keycloak from "https://esm.sh/keycloak-js@26.2.4";
   ...
 </script>
 ```
+
+> `keycloak-js` en npm no sigue el mismo versionado que el servidor Keycloak (el compose usa
+> `26.7.4` para el servidor, pero la última versión del paquete cliente es `26.2.4`). Pedir a
+> `esm.sh` una versión de `keycloak-js` que no existe en npm devuelve 404 — comprobar la versión
+> real en [npmjs.com/package/keycloak-js](https://www.npmjs.com/package/keycloak-js) antes de
+> fijarla aquí.
 
 Sigue siendo HTML estático que `nginx` sirve tal cual — el único cambio es la sintaxis de la
 etiqueta, no el enfoque.
@@ -61,20 +67,31 @@ docker compose up -d
    - General settings: Client ID = `spa-curso` → Next.
    - Capability config: **Client authentication = OFF** (público, sin secreto), **Standard flow =
      ON**, el resto OFF → Next.
-   - Login settings: **Valid redirect URIs** = `http://localhost:8081/*`. **Web origins** =
-     `http://localhost:8081` (necesario para que el navegador pueda hacer la petición a `/token`
-     entre orígenes distintos — 8081 vs 8080) → Save.
+   - Login settings: **Valid redirect URIs** = `http://localhost:8081/*`. **Valid post logout
+     redirect URIs** = `http://localhost:8081/*` (la SPA llama a `keycloak.logout()` con un
+     `redirectUri` explícito — desde Keycloak 22 ese redirect se valida contra este campo
+     aparte, no contra "Valid redirect URIs"; si se deja vacío, cerrar sesión falla). **Web
+     origins** = `http://localhost:8081` (necesario para que el navegador pueda hacer la
+     petición a `/token` entre orígenes distintos — 8081 vs 8080) → Save.
 2. **Forzar PKCE:** abrir el cliente `spa-curso` → pestaña **Advanced** → sección **Advanced
    settings** → **Proof Key for Code Exchange Code Challenge Method** → `S256` → Save.
 3. **Preparar la captura:** abrir `http://localhost:8081/` → DevTools (F12) → pestaña **Network**
    → marcar **Preserve log** (importante: sin esto, la redirección borra las peticiones anteriores
    y no se ve la secuencia completa).
 4. **Login:** clic en "Iniciar sesión". Seguir en el Network tab:
-   - Petición a `.../protocol/openid-connect/auth?...&code_challenge=...&code_challenge_method=S256`
-   - Login como `diego` en la pantalla de Keycloak.
-   - Redirección de vuelta a `http://localhost:8081/?code=...&state=...`.
+   - Petición GET a `.../protocol/openid-connect/auth?...&code_challenge=...&code_challenge_method=S256`
+     — este es el `code_challenge`, apúntalo para el momento clave.
+   - POST a `.../login-actions/authenticate?...` — el envío del formulario usuario/contraseña de la
+     propia pantalla de login de Keycloak. No es parte del intercambio OAuth/PKCE, se puede ignorar.
+   - Login como `diego`.
+   - Redirección de vuelta a la SPA. La petición inicial lleva `response_mode=fragment`, así que el
+     `code` y el `state` llegan en el **fragmento** de la URL (`http://localhost:8081/#state=...&code=...`),
+     no en la query string. Un fragmento no viaja al servidor: no aparece como petición de red nueva
+     en el Network tab, solo como la navegación de nivel superior — es la propia página, ya cargada,
+     la que lee `location.hash` con JavaScript.
    - POST automático a `.../protocol/openid-connect/token` con `code`, `code_verifier` y
-     `client_id` en el cuerpo (form-urlencoded).
+     `client_id` en el cuerpo (form-urlencoded) — esta sí es una petición de red normal, es la que
+     hay que localizar para el momento clave.
 5. **Comprobar el resultado:** la página debe mostrar el `access_token` en crudo y sus `claims`
    (`iss`, `aud`, `exp`, entre otros) ya parseados en pantalla.
 

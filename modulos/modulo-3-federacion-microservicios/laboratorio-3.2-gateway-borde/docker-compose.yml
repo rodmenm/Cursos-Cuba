@@ -1,26 +1,27 @@
-name: lab1-keycloak
+name: lab3-2-gateway-borde
 
 services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.4
-    container_name: keycloak
+    container_name: keycloak-lab3-2
     restart: unless-stopped
     env_file:
       - .env
     environment:
       KC_HEALTH_ENABLED: "true"
-      KC_HOSTNAME: keycloak
+      KC_HOSTNAME: http://localhost:8082
     command:
       - start-dev
-    ports:
-      - "8080:8080"
-      - "9000:9000"
+    # Sin "ports": Keycloak no es alcanzable desde fuera de la red de Docker.
+    # Todo el tráfico público pasa por oauth2-proxy (ver más abajo, y el README).
     volumes:
       - keycloak_data:/opt/keycloak/data
     healthcheck:
       test:
         - "CMD-SHELL"
-        - "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"
+        # "timeout 3" es necesario: /health/ready responde con la conexión en keep-alive,
+        # así que un simple "cat" se queda esperando un EOF que nunca llega.
+        - "timeout 3 bash -c 'exec 3<>/dev/tcp/localhost/9000 && echo -e \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n\" >&3 && cat <&3' | grep -q '200 OK'"
       interval: 10s
       timeout: 5s
       retries: 15
@@ -44,13 +45,37 @@ services:
       - "8082:4180"
     command:
       - --provider=keycloak-oidc
-      - --oidc-issuer-url=http://keycloak:8080/realms/curso
-      - --redirect-url=http://localhost:8082/oauth2/callback
       - --http-address=0.0.0.0:4180
-      - --upstream=http://whoami:80
+      - --oidc-issuer-url=http://localhost:8082/realms/curso
+      # Discovery automático fallaría: pediría el documento a http://localhost:8082/...,
+      # que dentro de este contenedor no es ningún sitio (localhost = él mismo). Se
+      # desactiva y se dan los endpoints a mano: el que ve el navegador (login-url,
+      # público) y los que solo habla oauth2-proxy por detrás (redeem/jwks/profile,
+      # por la red interna de Docker, contra el nombre de servicio "keycloak").
+      - --skip-oidc-discovery=true
+      - --login-url=http://localhost:8082/realms/curso/protocol/openid-connect/auth
+      - --redeem-url=http://keycloak:8080/realms/curso/protocol/openid-connect/token
+      - --oidc-jwks-url=http://keycloak:8080/realms/curso/protocol/openid-connect/certs
+      - --profile-url=http://keycloak:8080/realms/curso/protocol/openid-connect/userinfo
+      - --client-id=gateway
+      - --redirect-url=http://localhost:8082/oauth2/callback
+      # Varios upstreams: whoami es el servicio protegido; los otros tres son las rutas
+      # que Keycloak necesita servir directamente al navegador (login, sus assets
+      # estáticos, la consola de admin) — sin ellos no habría forma de llegar a Keycloak
+      # sin publicar su propio puerto.
+      - --upstream=http://whoami:80/
+      - --upstream=http://keycloak:8080/realms/
+      - --upstream=http://keycloak:8080/resources/
+      - --upstream=http://keycloak:8080/admin/
+      # Estas tres no pueden exigir la sesión de oauth2-proxy: son justo las rutas que
+      # hacen falta para poder crear esa sesión (o para administrar Keycloak con su
+      # propio login, independiente del de este gateway).
+      - --skip-auth-route=^/realms/.*
+      - --skip-auth-route=^/resources/.*
+      - --skip-auth-route=^/admin/.*
       - --email-domain=*
-      - --pass-user-headers=true
       - --pass-authorization-header=true
+      - --set-xauthrequest=true
       - --skip-provider-button=true
       - --cookie-secure=false
 
