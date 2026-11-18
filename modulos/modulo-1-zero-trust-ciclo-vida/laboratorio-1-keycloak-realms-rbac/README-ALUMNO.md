@@ -70,7 +70,7 @@ graph TD
   D["Usuario: diego"] --> GR["Grupo: redaccion"]
   GL --> RL["Rol: lector<br/>(view-profile)"]
   GR --> RE["Rol: editor<br/>(manage-account)"]
-  RE -. hereda .-> RL
+  RE -. adquiere .-> RL
 ```
 
 Como cierre, y en lo que será un hilo conductor de todo el curso, no nos conformaremos con ver que
@@ -99,9 +99,7 @@ docker compose ps
 ```
 
 Una vez operativo, abra `http://localhost:8080/` y acceda a la **Administration Console** con las
-credenciales definidas en `.env` (`admin` / `admin` por defecto). En la esquina superior izquierda
-figurará el realm `master`: es el realm de administración del propio Keycloak, y conviene tenerlo
-presente porque se retomará al final de la práctica.
+credenciales definidas en `.env` (`admin` / `admin` por defecto). En la entrada "Manage realms", el realm `master` sera el que aparezca activo: es el realm de administración del propio Keycloak, y conviene tenerlo presente porque se retomará al final de la práctica.
 
 > **Pregunta.** Al acceder, Keycloak advierte: "you are logged in as a temporary admin user". ¿Por
 > qué califica esa cuenta de *temporary*?
@@ -191,7 +189,8 @@ porque `diego` posee `manage-account` a través de su rol `editor`.
 > `manage-account`), la consola de cuenta de esta versión de Keycloak no se degrada a un modo de solo
 > lectura: directamente no carga y muestra una pantalla de error. No se trata de un fallo de
 > configuración, sino de una limitación conocida de esta versión. El permiso de Marta se comprobará
-> en el apartado siguiente, de una forma más fiable.
+> en el apartado 4 mediante el token; y en el apartado 5 se reproducirá esta misma situación de forma
+> deliberada, para entender a qué se debe.
 
 > **Pregunta.** ¿Qué ventaja concreta aporta este modelo si `redaccion` tuviera 200 personas en lugar
 > de una?
@@ -246,12 +245,34 @@ tocar al usuario.
 
 1. En el realm `curso` → **Groups** → `redaccion` → **Role mapping** → retire (Unassign) el rol
    `editor`. En ningún momento se modifica al usuario Diego.
-2. En la pestaña donde Diego mantiene abierta su consola de cuenta, actualice la página. No es
-   necesario volver a iniciar sesión: los campos del perfil pasan a solo lectura.
-3. Repita la evaluación del apartado 4 para `diego`: `manage-account` ha desaparecido de su token.
+2. En la pestaña donde Diego mantiene abierta su consola de cuenta, actualice la página (no es
+   necesario volver a iniciar sesión: el token se renueva a partir de la sesión activa). La consola
+   dejará de cargar y mostrará una pantalla de error. El motivo merece razonarse: al retirar el rol
+   **compuesto** `editor`, Diego no pierde únicamente `manage-account`, sino *todos* sus permisos,
+   incluido `view-profile` —que le llegaba precisamente a través de la cadena `editor` → `lector`—.
+   Se queda, por tanto, sin ningún rol. Retirar un rol compuesto arrastra consigo toda la jerarquía
+   que colgaba de él.
+3. Intente ahora acceder a la consola de cuenta como **Marta** —la comprobación que el apartado 3
+   había dejado pendiente—, en `http://localhost:8080/realms/curso/account/`. El inicio de sesión se
+   completa, pero la consola no llega a cargar: se produce la misma pantalla de error que acaba de
+   observarse con Diego.
 
-El permiso de Diego ha cambiado sin que se le haya tocado a él directamente, y lo ha hecho con solo
-actualizar la página. Esto revela algo importante sobre cómo funcionan los tokens.
+   > **Nota.** Este comportamiento no es un error de configuración, sino una particularidad de cómo
+   > está construido Keycloak. Marta posee `view-profile`, esto es, permiso para *ver* su perfil; sin
+   > embargo, esta versión de la consola de cuenta (la v3) exige `manage-account` para arrancar
+   > siquiera. Al no disponer de él, no ofrece una versión de solo lectura: sencillamente no carga (un
+   > error 401 en segundo plano). El modelo de permisos de Marta es correcto; es la interfaz la que no
+   > sabe degradarse con elegancia ante la ausencia de ese permiso. De ahí la idea que recorre toda la
+   > práctica: para saber qué puede hacer realmente cada usuario no debe observarse la pantalla, sino
+   > el token.
+4. Compruébese precisamente eso. Repita la evaluación del apartado 4 para `diego`: en
+   `resource_access.account.roles` ya no figura `manage-account` (tampoco `view-profile`). El cambio
+   efectuado sobre el grupo se ha propagado hasta el token de Diego sin haberle modificado a él en
+   ningún momento.
+
+El permiso de Diego ha cambiado sin que se le haya tocado a él directamente, y ha bastado con
+actualizar la página para que el cambio surta efecto. Esto revela algo importante sobre cómo
+funcionan los tokens.
 
 > **Pregunta.** Diego pierde la capacidad de editar con solo actualizar la página, sin cerrar ni
 > volver a abrir sesión. ¿Cómo es posible?
@@ -289,5 +310,12 @@ Se exporta el realm construido como evidencia del trabajo:
   de `curso`. Selecciónelo de nuevo.
 - El contenedor tarda en alcanzar el estado `healthy` → es normal en el primer arranque; espere
   30-40 segundos.
+- La consola de cuenta de un usuario queda atascada en una pantalla de error (el usuario carece de
+  `manage-account` pero conserva una sesión y un token activos) → se recupera de dos formas: (a)
+  restaurar el permiso, volviendo a asignar el rol correspondiente —en esta práctica, `editor` al
+  grupo `redaccion`—, con lo que el siguiente token vuelve a incluir `manage-account` y la consola
+  carga de nuevo; o (b) cerrar la sesión del usuario desde la consola de administración, en **Users**
+  → el usuario → pestaña **Sessions** → **Sign out**, lo que invalida la sesión activa y obliga a
+  emitir un token nuevo en el próximo acceso.
 - Para reiniciar el entorno desde cero (se elimina el realm, los usuarios y los roles):
   `docker compose down -v && docker compose up -d`.

@@ -1,0 +1,41 @@
+name: lab4-vault
+
+services:
+  vault:
+    image: hashicorp/vault:1.21.3
+    container_name: lab4-vault
+    command: server -config=/vault/config/vault.hcl
+    ports:
+      - "8200:8200"
+    cap_add:
+      - IPC_LOCK
+    environment:
+      VAULT_ADDR: "http://127.0.0.1:8200"
+    volumes:
+      - ./config/vault.hcl:/vault/config/vault.hcl:ro
+      - vault_data:/vault/file
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: lab4-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: appdb
+    volumes:
+      - ./config/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - postgres_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer:4.8.1
+    container_name: lab4-adminer
+    ports:
+      - "8083:8080"
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+volumes:
+  vault_data:
+  postgres_data:

@@ -79,8 +79,8 @@ explícitamente lo que necesita.
     > Console v3 no degrada a un modo de solo lectura — directamente no carga y muestra una pantalla
     > de error genérica (401 en `supportedLocales` y en `userProfileMetadata`). Es una limitación real
     > de esta versión de la consola, verificada al montar el lab, no algo que hayamos hecho mal.
-    > Enseñarle eso a un alumno da la sensación de que se ha roto todo el entorno, así que no forma
-    > parte del guion — se compara de otra forma, en el siguiente paso.
+    > Aquí, en pleno montaje, no lo tocamos todavía (daría la sensación de que se ha roto el entorno),
+    > pero lo usaremos **a propósito** como demostración en el bloque "Romperlo".
 
 13. **Abrir el token y comparar (el momento "abre el token" de este lab):** menú **Clients** →
     `account` → pestaña **Client scopes** → sub-pestaña **Evaluate** → seleccionar usuario `diego` →
@@ -97,11 +97,28 @@ explícitamente lo que necesita.
 1. Volver a `curso` → **Groups** → `redaccion` → **Role mapping** → quitar (Unassign) el rol `editor`.
    No se toca a Diego en ningún momento.
 2. Volver a la pestaña donde Diego tiene abierta su Account Console y refrescar la página (no hace
-   falta re-login: el token se renueva solo con la sesión activa). Los campos de edición del perfil
-   pasan a modo solo lectura.
-3. Repetir el Evaluate del paso 13 para `diego`: `manage-account` ya no aparece en
-   `resource_access.account.roles`. Mismo token, misma prueba, ahora en la dirección contraria.
-4. Pregunta para el aula: *"¿qué pasaría si `redaccion` tuviera 200 personas en vez de una?"* — es
+   falta re-login: el token se renueva solo con la sesión activa). **Ojo, ten esto claro tú antes de
+   clase:** la consola **no** pasa a "modo solo lectura" — deja de cargar y muestra una pantalla de
+   error, igual que el aviso de Marta del paso 12. El motivo: `editor` es un rol **compuesto**, así
+   que al quitarlo Diego no pierde solo `manage-account`, también pierde `view-profile`, que le
+   llegaba por la cadena `editor → lector`. Se queda sin ningún rol, y la Account Console v3 no carga
+   sin al menos `manage-account`.
+3. **Momento "intenta entrar con Marta" (demo deliberada):** ahora que la consola ya está rota para
+   Diego, provoca el mismo fallo a propósito. Pide a los alumnos que **intenten entrar en la Account
+   Console con Marta** (`http://localhost:8080/realms/curso/account/`, usuario `marta`). Déjales que
+   lo vean fallar primero, sin adelantar nada: el login va bien, pero la consola peta — pantalla de
+   error, no carga. *Entonces* lo cierras tú:
+   > "Peta, ¿verdad? Y no es que lo hayáis hecho mal ni que esté mal configurado. Marta tiene
+   > `view-profile`, o sea, permiso para *ver* su perfil. Pero esta versión de la Account Console de
+   > Keycloak —la v3— exige `manage-account` para arrancar siquiera; si no lo tienes, no te muestra una
+   > versión de solo lectura: directamente no carga (un 401 por dentro). Es una curiosidad de **cómo
+   > está hecho Keycloak**, no de nuestro modelo de permisos — el modelo de Marta es correcto, es la
+   > pantalla la que no sabe degradarse con elegancia. Y justo por eso, para saber de verdad qué puede
+   > hacer cada uno, no miramos la pantalla: miramos el token."
+4. Repetir el Evaluate del paso 13 para `diego`: `manage-account` (y `view-profile`) ya no aparecen en
+   `resource_access.account.roles`. Mismo token, misma prueba, ahora en la dirección contraria — y
+   esta vez sí es la prueba fiable, la que no depende de los caprichos de la pantalla.
+5. Pregunta para el aula: *"¿qué pasaría si `redaccion` tuviera 200 personas en vez de una?"* — es
    el argumento a favor de RBAC por grupo frente a asignar roles usuario a usuario.
 
 ## Entregable (10 min)
@@ -144,6 +161,15 @@ pregunta antes de seguir, no se responden solas.
 
 Para el atasco típico: alguien se queda mirando `master` y no ve usuarios/roles que creó en
 `curso` (realm equivocado en el desplegable), o el contenedor tarda en pasar a `healthy`.
+
+**Usuario atrapado en la pantalla de error de la Account Console** (no tiene `manage-account` pero
+mantiene sesión y token activos — es justo lo que provocamos en "Romperlo" con Diego y con Marta):
+se sale de dos formas, y conviene tener ambas a mano en clase:
+- **Restaurar el permiso:** volver a asignar el rol (aquí, `editor` al grupo `redaccion`). El
+  siguiente token ya trae `manage-account` y la consola vuelve a cargar.
+- **Cerrar la sesión desde admin:** **Users** → el usuario → pestaña **Sessions** → **Sign out**.
+  Invalida la sesión activa y fuerza a pedir un token nuevo en el próximo login, lo que saca al
+  usuario del bucle de error.
 
 ## Reset
 
